@@ -11,11 +11,5 @@ class ParameterizationRegistry(abc.ABCMeta):
     def __init__(cls, name, bases, attrs):
         type.__init__(cls, name, bases, attrs)
 
-        if hasattr(cls, 'parameterization'):
-            registry[cls.parameterization] = cls
-        else:
-            if name != "Parameterization":
-                raise RuntimeError(
-                    'Parameterization subclasses need a "parameterization" '
-		    'attribute'
-                )
+        if hasattr(cls, 'name'):
+            registry[cls.name] = cls
