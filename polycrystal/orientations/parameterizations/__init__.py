@@ -7,19 +7,15 @@ The primary interface here is through the `to_rmats()`, `from_rmats()` and
 methods for that class. The parameterization will be automatically registered here.
 
 The parameterizations here are not meant to be exhaustive. They are mainly for
-internal use, particularly the quaternions. The `scipy` Rotation class
-is a good choice for more complete conversions.
+internal use, particularly the quaternions. They are based on the `scipy` Rotation
+class when possible.
 
 See Also
 ---------
 
-* `scipy.transform.Rotation`_
+* `scipy.spatial.transform.Rotation`_
 
 .. _scipy.transform.Rotation: https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html
 """
-import pkgutil
-import importlib
 
-
-from ._registry import registry
 from ._convert import names, to_rmats, from_rmats, convert
