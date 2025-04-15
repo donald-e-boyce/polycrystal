@@ -20,6 +20,6 @@ setup(
     )
 install_reqs = [
     'numpy',
-    'scipy',
+    'scipy>1.13',
     'pytest',
 ]

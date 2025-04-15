@@ -138,21 +138,26 @@ class _Quaternion(_Parameterization):
     """Quaternion"""
 
     name = "quaternions"
+    kwargs = {"scalar_first": True}
 
-    def to_rmats(self, a):
-        return Rotation.as_matrix(Rotation.from_quat(a))
+    @classmethod
+    def to_rmats(cls, a):
+        return Rotation.as_matrix(Rotation.from_quat(a, **cls.kwargs))
 
-    def from_rmats(self, r):
-        return Rotation.as_quat(Rotation.from_matrix(r))
+    @classmethod
+    def from_rmats(cls, r):
+        return Rotation.as_quat(Rotation.from_matrix(r), **cls.kwargs)
 
 
 class _Exponential(_Parameterization):
     """Exponential map using axial vector of skew matrix"""
 
-    name = "exponentials"
+    name = "axial-vectors"
 
-    def to_rmats(self, a):
+    @classmethod
+    def to_rmats(cls, a):
         return Rotation.as_matrix(Rotation.from_rotvec(a))
 
-    def from_rmats(self, r):
+    @classmethod
+    def from_rmats(cls, r):
         return Rotation.as_rotvec(Rotation.from_matrix(r))
