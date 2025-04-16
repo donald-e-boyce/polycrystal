@@ -6,9 +6,13 @@ import numpy as np
 from polycrystal.orientations import parameterizations
 
 
+np.set_printoptions(precision=2, suppress=True)
+
+
 class Names:
     quats = "quaternions"
     avecs = "axial-vectors"
+    eulZXZ = "euler-ZXZ-deg"
 
 
 @pytest.fixture
@@ -67,3 +71,44 @@ def test_axial_vectors(avec_90deg, rmat_90deg):
 
     rmat = parameterizations.to_rmats(avec_90deg, Names.avecs)
     assert np.allclose(rmat, rmat_90deg)
+
+
+# Test Euler angles.
+
+
+@pytest.fixture
+def euler_ZXZ_in():
+    return np.array(
+        [
+            [90, 0, 0],
+            [0, 90, 0],
+            [0, 0, 90],
+            [90, 90, 0],
+            [90, 0, 90],
+            [0, 90, 90],
+            [90, 90, 90]
+        ],
+        dtype=float
+    )
+
+
+@pytest.fixture
+def euler_ZXZ_out():
+    return np.array(
+        [
+            [[0,-1,0],[1,0,0],[0,0,1]],
+            [[1,0,0],[0,0,-1],[0,1,0]],
+            [[0,-1,0],[1,0,0],[0,0,1]],
+            [[0,0,1],[1,0,0],[0,1,0]],
+            [[-1,0,0],[0,-1,0],[0,0,1]],
+            [[0,-1,0],[0,0,-1],[1,0,0]],
+            [[0,0,1],[0,-1,0],[1,0,0]]
+        ],
+        dtype=float
+    )
+
+
+def test_euler_zxz_deg(euler_ZXZ_in, euler_ZXZ_out):
+
+    rmat = parameterizations.to_rmats(euler_ZXZ_in, Names.eulZXZ)
+    assert np.allclose(rmat, euler_ZXZ_out)

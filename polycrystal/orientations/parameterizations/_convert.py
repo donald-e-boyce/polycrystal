@@ -50,13 +50,22 @@ class _ParameterizationABC(abc.ABC):
 
 
 class _ParameterizationRegistry(abc.ABCMeta):
-    """Keep a dictionary of parameterizations by name"""
+    """Keep a dictionary of parameterizations by name
+
+    The dictionary key is based on class's name attribute. If it is a string, then
+    that string is the key. If it is a list, then each string in the list is an
+    alias for the class.
+    """
 
     def __init__(cls, name, bases, attrs):
         type.__init__(cls, name, bases, attrs)
 
         if hasattr(cls, "name"):
-            _registry[cls.name] = cls
+            if isinstance(cls.name, list):
+                for n in cls.name:
+                    _registry[n] = cls
+            else:
+                _registry[cls.name] = cls
 
 
 # Here is the base class for parameterizations, which automatically registers
@@ -161,3 +170,19 @@ class _Exponential(_Parameterization):
     @classmethod
     def from_rmats(cls, r):
         return Rotation.as_rotvec(Rotation.from_matrix(r))
+
+
+class _Euler_ZXZ_deg(_Parameterization):
+    """Euler angles on axes zxz in degrees"""
+
+    name = ["euler-ZXZ-deg", "bunge"]
+    seq = "ZXZ"
+    kwa = {"degrees": True}
+
+    @classmethod
+    def to_rmats(cls, a):
+        return Rotation.as_matrix(Rotation.from_euler(cls.seq, a, **cls.kwa))
+
+    @classmethod
+    def from_rmats(cls, r):
+        return Rotation.as_euler(seq, Rotation.from_matrix(r), **cls.kwa)
