@@ -12,7 +12,7 @@ np.set_printoptions(precision=2, suppress=True)
 class Names:
     quats = "quaternions"
     avecs = "axial-vectors"
-    eulZXZ = "euler-ZXZ-deg"
+    eulZXZ = "euler:ZXZ-deg"
 
 
 @pytest.fixture
@@ -30,11 +30,22 @@ def identity_axial_vector():
     return np.array([0.0, 0, 0])
 
 
-def test_identity(identity_matrix, identity_quaternion, identity_axial_vector):
+@pytest.fixture
+def identity_euler_ZXZ_deg():
+    return np.array([0.0, 0, 0])
+
+
+def test_identity(
+        identity_matrix, identity_quaternion, identity_axial_vector,
+        identity_euler_ZXZ_deg
+):
     rmat = parameterizations.to_rmats(identity_quaternion, Names.quats)
     assert np.allclose(rmat, identity_matrix)
 
     rmat = parameterizations.to_rmats(identity_axial_vector, Names.avecs)
+    assert np.allclose(rmat, identity_matrix)
+
+    rmat = parameterizations.to_rmats(identity_euler_ZXZ_deg, Names.eulZXZ)
     assert np.allclose(rmat, identity_matrix)
 
 
@@ -108,7 +119,7 @@ def euler_ZXZ_out():
     )
 
 
-def test_euler_zxz_deg(euler_ZXZ_in, euler_ZXZ_out):
+def test_euler_ZXZ_deg(euler_ZXZ_in, euler_ZXZ_out):
 
     rmat = parameterizations.to_rmats(euler_ZXZ_in, Names.eulZXZ)
     assert np.allclose(rmat, euler_ZXZ_out)

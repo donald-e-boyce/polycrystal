@@ -175,7 +175,7 @@ class _Exponential(_Parameterization):
 class _Euler_ZXZ_deg(_Parameterization):
     """Euler angles on axes zxz in degrees"""
 
-    name = ["euler-ZXZ-deg", "bunge"]
+    name = ["euler:ZXZ-deg", "bunge"]
     seq = "ZXZ"
     kwa = {"degrees": True}
 
