@@ -83,6 +83,9 @@ def test_axial_vectors(avec_90deg, rmat_90deg):
     rmat = parameterizations.to_rmats(avec_90deg, Names.avecs)
     assert np.allclose(rmat, rmat_90deg)
 
+    avec = parameterizations.from_rmats(rmat_90deg, Names.avecs)
+    assert np.allclose(avec, avec_90deg)
+
 
 # Test Euler angles.
 
@@ -123,3 +126,12 @@ def test_euler_ZXZ_deg(euler_ZXZ_in, euler_ZXZ_out):
 
     rmat = parameterizations.to_rmats(euler_ZXZ_in, Names.eulZXZ)
     assert np.allclose(rmat, euler_ZXZ_out)
+
+
+def test_quaternions(euler_ZXZ_out):
+
+    # Here we test quaternions using the output matrices from the Euler angle test.
+
+    q = parameterizations.from_rmats(euler_ZXZ_out, Names.quats)
+    r = parameterizations.to_rmats(q, Names.quats)
+    assert np.allclose(r, euler_ZXZ_out)

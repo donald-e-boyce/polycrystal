@@ -151,11 +151,11 @@ class _Quaternion(_Parameterization):
 
     @classmethod
     def to_rmats(cls, a):
-        return Rotation.as_matrix(Rotation.from_quat(a, **cls.kwargs))
+        return Rotation.from_quat(a, **cls.kwargs).as_matrix()
 
     @classmethod
     def from_rmats(cls, r):
-        return Rotation.as_quat(Rotation.from_matrix(r), **cls.kwargs)
+        return Rotation.from_matrix(r).as_quat(**cls.kwargs)
 
 
 class _Exponential(_Parameterization):
@@ -165,11 +165,11 @@ class _Exponential(_Parameterization):
 
     @classmethod
     def to_rmats(cls, a):
-        return Rotation.as_matrix(Rotation.from_rotvec(a))
+        return Rotation.from_rotvec(a).as_matrix()
 
     @classmethod
     def from_rmats(cls, r):
-        return Rotation.as_rotvec(Rotation.from_matrix(r))
+        return Rotation.from_matrix(r).as_rotvec()
 
 
 class _Euler_ZXZ_deg(_Parameterization):
@@ -181,8 +181,8 @@ class _Euler_ZXZ_deg(_Parameterization):
 
     @classmethod
     def to_rmats(cls, a):
-        return Rotation.as_matrix(Rotation.from_euler(cls.seq, a, **cls.kwa))
+        return Rotation.from_euler(cls.seq, a, **cls.kwa).as_matrix()
 
     @classmethod
     def from_rmats(cls, r):
-        return Rotation.as_euler(seq, Rotation.from_matrix(r), **cls.kwa)
+        return Rotation.from_matrix(r).as_euler(cls.seq, **cls.kwa)
