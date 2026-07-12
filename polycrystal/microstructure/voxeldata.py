@@ -8,19 +8,24 @@ import numpy as np
 class VoxelData(CgoMicrostructure):
     """Voxel data based on regular grid
 
-
     Parameters
     ----------
     grain_ids: int array (l, m, n)
-       array of grain IDs
-    orientation_list: array (n, 3, 3)
-       list of orientations
+       array of grain IDs. IDs need not be contiguous — gaps are permitted so
+       that a coarser voxel dataset can reuse the same IDs as a finer one, and
+       so that ID 0 can be reserved for unknown or unassigned voxels.
+       `num_grains` returns ``grain_ids.max() + 1``, which is the number of
+       slots required in `orientation_list`, not necessarily the count of
+       distinct grains present in the array.
+    orientation_list: array (num_grains, 3, 3)
+       orientations indexed by grain ID
     voxel_dims: 3-tuple
        the voxel dimensions in each direction
     origin: tuple | array, default = (0,0,0)
        lower left corner of box
     direction: 3-tuple of bools, default = (True, True, True)
-       voxel directions, True meaning values go from low to high
+       voxel ordering per axis; True means the voxel index increases with
+       coordinate value, False means it decreases
     """
 
     def __init__(
@@ -47,7 +52,7 @@ class VoxelData(CgoMicrostructure):
 
     @property
     def direction(self):
-        """Voxel order direction (increasing/decreasing)"""
+        """Voxel order direction (increasing/decreasing) per axis"""
         return self._direction
 
     @direction.setter
@@ -61,28 +66,37 @@ class VoxelData(CgoMicrostructure):
         """number of cells"""
         return np.prod(self.shape)
 
-    def _in_box(self, x):
-        """determine if point lies in the box of cells"""
-        okll = np.all((x - self.lowleft) >= 0.)
-        okur = np.all((self.upright - x) >= 0.)
-        return okll and okur
-
-    def voxel_ijk(self, x):
-        """determine cell containing point x"""
-        dx = x - self.v0
-        xdivs = (dx / self.dv).astype(int)
-        ds = np.array(self.shape)
-        xdivs = np.minimum(xdivs, ds - 1)
-
-        return tuple(xdivs)
-
     def grain(self, x):
+        """grain ID by position
+
+        Parameters
+        ----------
+        x: array (n, 3)
+           array of `n` points
+
+        Returns
+        -------
+        int array (n)
+           grain IDs for each point; points outside the grid are clamped to
+           the nearest boundary cell
+        """
         dx = x - self.v0
-        vox = np.minimum((dx / self.dv).astype(int), np.array(self.shape) - 1)
+        vox = np.clip((dx / self.dv).astype(int), 0, np.array(self.shape) - 1)
         return self.gids[vox[:, 0], vox[:, 1], vox[:, 2]]
 
     def phase(self, g):
-        """Determine grain ID for grain `g`"""
+        """phase ID for grains `g`
+
+        Parameters
+        ----------
+        g: int array (n)
+           array of grain IDs
+
+        Returns
+        -------
+        int array (n)
+           phase IDs (always 0; VoxelData is single-phase)
+        """
         return np.zeros(len(g), dtype=int)
 
     @property
@@ -90,4 +104,16 @@ class VoxelData(CgoMicrostructure):
         return self._orientations
 
     def grain_orientation(self, g):
+        """orientation of grains
+
+        Parameters
+        ----------
+        g: int array (n)
+           array of grain IDs
+
+        Returns
+        -------
+        array (n, 3, 3)
+           rotation matrices for each grain
+        """
         return self.orientation_list[g]
