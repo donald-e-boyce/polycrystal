@@ -16,6 +16,8 @@ class Isotropic(BaseModuli):
        elastic modulus coefficients
     system: Enum
        MatrixComponentSystem attribute
+    units: str
+       units for the stress
     """
 
     def __init__(self, c11, c12, system, units):
