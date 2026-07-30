@@ -30,8 +30,8 @@ materials:
     c11 : 11.0
     c12 : 12.0
     c13 : 13.0
-    c44 : 44.0
-    c66 : 66.0
+    c33 : 44.0
+    c44 : 66.0
   reference: hex-mat-ref
 
 - name     : tet-mat

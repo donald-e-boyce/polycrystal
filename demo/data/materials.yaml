@@ -17,8 +17,8 @@ materials:
     c11 : 154
     c12 : 86.0
     c13 : 67.3
-    c44 : 183
-    c66 : 46.7
+    c33 : 183
+    c44 : 46.7
   reference: >
       Flowers, J. W., K. C. O’Brien, and P. C. McEleney. 1964.
       “Elastic Constants of Alpha-Titanium Single Crystals at 25°C.”
