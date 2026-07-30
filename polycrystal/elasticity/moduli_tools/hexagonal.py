@@ -11,7 +11,7 @@ class Hexagonal(BaseModuli):
 
     Parameters
     ----------
-    c11, c12: float
+    c11, c12, c13, c33, c44: float
        elastic modulus coefficients
     system: Enum
        MatrixComponentSystem attribute

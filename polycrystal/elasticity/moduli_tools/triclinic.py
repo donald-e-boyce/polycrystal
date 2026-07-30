@@ -15,6 +15,8 @@ class Triclinic(BaseModuli):
        elastic modulus coefficients
     system: Enum
        MatrixComponentSystem attribute
+    units: str
+       units for the stress
     """
 
     def __init__(self, cij, system, units):

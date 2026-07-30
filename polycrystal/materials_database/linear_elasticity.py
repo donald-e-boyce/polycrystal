@@ -8,7 +8,7 @@ from polycrystal.elasticity.moduli_tools.isotropic import Isotropic
 from .base_loader import BaseLoader
 
 
-C11, C12, C13, C44, C66 = "c11", "c12", "c13", "c44", "c66"
+C11, C12, C13, C33, C44 = "c11", "c12", "c13", "c33", "c44"
 E, NU = "E", "nu"
 
 
@@ -77,7 +77,7 @@ class LinearElasticMaterial(BaseLoader):
         elif symm2use == "cubic":
             cij = [mod[c] for c in (C11, C12, C44)]
         elif symm2use == "hexagonal":
-            cij = [mod[c] for c in (C11, C12, C13, C44, C66)]
+            cij = [mod[c] for c in (C11, C12, C13, C33, C44)]
 
         return cij
 

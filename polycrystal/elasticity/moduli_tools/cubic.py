@@ -21,6 +21,8 @@ class Cubic(BaseModuli):
        elastic modulus coefficients
     system: Enum
        MatrixComponentSystem
+    units: str
+       units for the stress
     """
     def __init__(self, c11, c12, c44, system, units):
         self.c11 = c11
