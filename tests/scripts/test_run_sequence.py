@@ -10,7 +10,7 @@ from polycrystal.slip.slip_models import (
     AF_ZeroBackStress,
     AF_ZeroBackStressParameters,
 )
-from polycrystal.slip.solve import MaterialData, StressData, StressSequence
+from polycrystal.slip.solve import StateData, StressIncrement, StressSequence
 from polycrystal.scripts import run_sequence
 from polycrystal.scripts.run_sequence import resolve_material, argparser, main
 
@@ -34,9 +34,9 @@ def test_run_sequence_programmatic(tmp_path, sample_material):
     numpts = 5
     g0 = 345.63
 
-    rmats = MaterialData.random_orientations(numpts)
-    state = MaterialData.constant_state_af(numpts, g0, matl.num_statevar)
-    mdata = MaterialData(matl, rmats, state)
+    rmats = StateData.random_orientations(numpts)
+    state = StateData.constant_state_af(numpts, g0, matl.num_statevar)
+    mdata = StateData(matl, rmats, state)
 
     mat_file = tmp_path / "material.npz"
     mdata.save_data(mat_file)
@@ -47,7 +47,7 @@ def test_run_sequence_programmatic(tmp_path, sample_material):
     ssig2 = np.zeros((3, 3))
 
     cstress = np.stack(
-        [StressData.cstress_from_sample(ssig, rmats) for ssig in (ssig0, ssig1, ssig2)]
+        [StressIncrement.cstress_from_sample(ssig, rmats) for ssig in (ssig0, ssig1, ssig2)]
     )
     times = np.array([0.0, 5.0, 10.0])
     sseq = StressSequence(csig=cstress, times=times)
@@ -69,8 +69,8 @@ def test_run_sequence_programmatic(tmp_path, sample_material):
     assert step1_file.exists()
     assert step2_file.exists()
 
-    step1_data = MaterialData.from_file(matl, step1_file)
-    step2_data = MaterialData.from_file(matl, step2_file)
+    step1_data = StateData.from_file(matl, step1_file)
+    step2_data = StateData.from_file(matl, step2_file)
 
     assert step1_data.orient.shape == (numpts, 3, 3)
     assert step2_data.orient.shape == (numpts, 3, 3)
@@ -115,16 +115,16 @@ def test_run_sequence_cli(tmp_path, sample_material, monkeypatch):
     numpts = 3
     g0 = 345.63
 
-    rmats = MaterialData.random_orientations(numpts)
-    state = MaterialData.constant_state_af(numpts, g0, matl.num_statevar)
-    mdata = MaterialData(matl, rmats, state)
+    rmats = StateData.random_orientations(numpts)
+    state = StateData.constant_state_af(numpts, g0, matl.num_statevar)
+    mdata = StateData(matl, rmats, state)
     mat_file = tmp_path / "material.npz"
     mdata.save_data(mat_file)
 
     ssig0 = np.zeros((3, 3))
     ssig1 = np.diag([200.0, -100.0, -100.0])
     cstress = np.stack(
-        [StressData.cstress_from_sample(ssig, rmats) for ssig in (ssig0, ssig1)]
+        [StressIncrement.cstress_from_sample(ssig, rmats) for ssig in (ssig0, ssig1)]
     )
     times = np.array([0.0, 2.0])
     sseq = StressSequence(csig=cstress, times=times)

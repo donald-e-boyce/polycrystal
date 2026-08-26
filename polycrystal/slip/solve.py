@@ -1,8 +1,8 @@
 """ODE solvers and data structures for plastic slip evolution.
 
 Provides solver strategies (Pointwise, Euler, Block) operating on
-MaterialData (grain orientations, state variables, and plastic deformation
-gradients) driven by StressData or StressSequence (time-dependent crystal
+StateData (grain orientations, state variables, and plastic deformation
+gradients) driven by StressIncrement or StressSequence (time-dependent crystal
 stress loading paths).
 """
 from collections import namedtuple
@@ -53,7 +53,7 @@ class StressSequence(_StressSequence):
         np.savez(filename, **self._asdict())
 
 
-class MaterialData:
+class StateData:
     """Grain ensemble state: crystal orientations, state variables, and
     plastic deformation gradients.
 
@@ -64,7 +64,7 @@ class MaterialData:
     """
 
     def __init__(self, material, orient, state, def_grad=None):
-        """Initialize material data for a grain ensemble.
+        """Initialize state data for a grain ensemble.
 
         Parameters
         ----------
@@ -167,7 +167,7 @@ class MaterialData:
 
     @classmethod
     def from_file(cls, material, filename):
-        """Load material data from a ``.npz`` file saved by :meth:`save_data`.
+        """Load state data from a ``.npz`` file saved by :meth:`save_data`.
 
         Parameters
         ----------
@@ -205,7 +205,7 @@ class MaterialData:
         return len(self.orient)
 
 
-class StressData:
+class StressIncrement:
     """Time-dependent crystal stress loading path between two stress states.
 
     Represents a linear ramp from an initial crystal stress ``csig0`` at
@@ -308,9 +308,9 @@ class Solver:
     def __init__(self, mdata, sdata):
         """Parameters
         ----------
-        mdata: MaterialData
+        mdata: StateData
             Grain ensemble state (orientations, state variables, def gradients).
-        sdata: StressData
+        sdata: StressIncrement
             Time-dependent crystal stress loading path.
         """
         self.mdata = mdata

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ..slip.solve import MaterialData, StressData, StressSequence, Pointwise
+from ..slip.solve import StateData, StressIncrement, StressSequence, Pointwise
 from ..slip.slipcrystal import SlipCrystal
 
 
@@ -67,7 +67,7 @@ def run_sequence(material, material_data, stress_data, outdir=None):
     ----------
     material: SlipCrystal, callable, or str
         Material model or import specifier.
-    material_data: MaterialData, str, or Path
+    material_data: StateData, str, or Path
         Initial material state or path to ``.npz`` file containing initial state.
     stress_data: StressSequence, str, or Path
         Stress sequence object or path to ``.npz`` file containing sequence.
@@ -77,14 +77,14 @@ def run_sequence(material, material_data, stress_data, outdir=None):
 
     Returns
     -------
-    MaterialData
+    StateData
         Final material state after completing all steps.
     """
     matl = resolve_material(material)
 
     if isinstance(material_data, (str, Path)):
-        mdata = MaterialData.from_file(matl, material_data)
-    elif isinstance(material_data, MaterialData):
+        mdata = StateData.from_file(matl, material_data)
+    elif isinstance(material_data, StateData):
         mdata = material_data
     else:
         raise TypeError(f"Unsupported material_data type: {type(material_data)}")
@@ -116,14 +116,14 @@ def run_sequence(material, material_data, stress_data, outdir=None):
 
     for istep in range(nsteps):
         dtime = sseq.times[istep + 1] - sseq.times[istep]
-        sdata = StressData(sseq.csig[istep], sseq.csig[istep + 1], dtime)
+        sdata = StressIncrement(sseq.csig[istep], sseq.csig[istep + 1], dtime)
         solver = Pointwise(mdata, sdata)
         thist = solver.run(time_history=True)
         fp = solver.integrate_fp(thist)
         state = np.zeros(s_shp)
         for ipt in range(npts):
             state[ipt] = thist[ipt][1:, -1]
-        mdata = MaterialData(matl, mdata.orient, state, fp)
+        mdata = StateData(matl, mdata.orient, state, fp)
         # Save new material state
         step_file = outdir / f"step-{istep + 1:02}.npz"
         mdata.save_data(step_file)

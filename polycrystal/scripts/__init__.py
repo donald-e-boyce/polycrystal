@@ -1,5 +1,5 @@
 """Scripts and workflow tools for polycrystal simulations."""
-from ..slip.solve import MaterialData, StressData, StressSequence
+from ..slip.solve import StateData, StressIncrement, StressSequence
 
 
 def run_sequence(*args, **kwargs):
@@ -9,8 +9,8 @@ def run_sequence(*args, **kwargs):
 
 
 __all__ = [
-    "MaterialData",
-    "StressData",
+    "StateData",
+    "StressIncrement",
     "StressSequence",
     "run_sequence",
 ]

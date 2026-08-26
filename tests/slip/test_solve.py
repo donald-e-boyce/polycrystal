@@ -1,10 +1,10 @@
-"""Unit tests for MaterialData, StressData, StressSequence, and solvers in polycrystal.slip.solve."""
+"""Unit tests for StateData, StressIncrement, StressSequence, and solvers in polycrystal.slip.solve."""
 import pytest
 import numpy as np
 
 from polycrystal.slip.solve import (
-    MaterialData,
-    StressData,
+    StateData,
+    StressIncrement,
     StressSequence,
     Pointwise,
     Euler,
@@ -41,54 +41,54 @@ def fcc_afzb_material():
     return SlipCrystal([get_group("fcc")], AF_ZeroBackStress(params))
 
 
-def test_materialdata_basic(tmp_path):
-    """Test MaterialData construction, static helpers, properties, and round-trip I/O."""
-    rmats = MaterialData.random_orientations(10)
+def test_statedata_basic(tmp_path):
+    """Test StateData construction, static helpers, properties, and round-trip I/O."""
+    rmats = StateData.random_orientations(10)
     assert rmats.shape == (10, 3, 3)
 
-    s1 = MaterialData.constant_state_af(5, 2.9, 1)
+    s1 = StateData.constant_state_af(5, 2.9, 1)
     assert s1.shape == (5,)
     assert s1[0] == 2.9
 
-    s12 = MaterialData.constant_state_af(7, 3.2, 12)
+    s12 = StateData.constant_state_af(7, 3.2, 12)
     assert s12.shape == (7, 12)
     assert s12[0, 0] == 3.2
 
-    s24 = MaterialData.constant_state_af(3, 1.4, 24)
+    s24 = StateData.constant_state_af(3, 1.4, 24)
     assert s24.shape == (3, 24)
     assert s24[0, 0] == 1.4
     assert s24[0, 12] == 0.0
 
-    defg = MaterialData.constant_defgrad(8)
+    defg = StateData.constant_defgrad(8)
     assert defg.shape == (8, 3, 3)
     assert np.allclose(defg[0], np.eye(3))
 
     m = StubMaterial()
-    md = MaterialData(m, rmats, s12, defg[:10])
+    md = StateData(m, rmats, s12, defg[:10])
     assert md.num_pts == 10
     assert md.num_sv == 17
 
     p = tmp_path / "out.npz"
     md.save_data(p)
 
-    md2 = MaterialData.from_file(m, p)
+    md2 = StateData.from_file(m, p)
     assert np.array_equal(md.orient, md2.orient)
     assert np.array_equal(md.state, md2.state)
     assert np.array_equal(md.def_grad, md2.def_grad)
 
 
-def test_stressdata_basic(tmp_path):
-    """Test StressData construction, round-trip I/O, interpolation, and frame rotation."""
+def test_stress_increment_basic(tmp_path):
+    """Test StressIncrement construction, round-trip I/O, interpolation, and frame rotation."""
     csig0 = np.array([[1.0, 0, 0], [0, -1.0, 0], [0, 0, 0]])
     csig1 = np.array([[0.0, 0, 0], [0, 1.0, 0], [0, 0, -1.0]])
     T = 5.2
-    sd = StressData(csig0, csig1, T)
+    sd = StressIncrement(csig0, csig1, T)
     assert sd.T == 5.2
 
     p = tmp_path / "sd.npz"
     sd.save(p)
 
-    sd2 = StressData.from_file(p)
+    sd2 = StressIncrement.from_file(p)
     assert np.allclose(sd.csig0, sd2.csig0)
     assert np.allclose(sd.csigT, sd2.csigT)
     assert sd.T == sd2.T
@@ -99,7 +99,7 @@ def test_stressdata_basic(tmp_path):
     # 90 degrees about x: [x, y, z] -> [x, z, -y]
     orient = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]).reshape(1, 3, 3)
     s_sig = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]]).reshape(1, 3, 3)
-    c_sig = StressData.cstress_from_sample(s_sig, orient)
+    c_sig = StressIncrement.cstress_from_sample(s_sig, orient)
     assert s_sig[0, 1, 1] == c_sig[0, 2, 2]
     assert s_sig[0, 2, 2] == c_sig[0, 1, 1]
 
@@ -128,17 +128,17 @@ def test_pointwise_solver(fcc_afzb_material):
     numpts = 4
     g0 = 345.63
 
-    rmats = MaterialData.random_orientations(numpts)
-    state = MaterialData.constant_state_af(numpts, g0, matl.num_statevar)
-    mdata = MaterialData(matl, rmats, state)
+    rmats = StateData.random_orientations(numpts)
+    state = StateData.constant_state_af(numpts, g0, matl.num_statevar)
+    mdata = StateData(matl, rmats, state)
 
     ssig0 = np.zeros((3, 3))
     ssig1 = np.diag([400.0, -200.0, -200.0])
 
-    csig0 = StressData.cstress_from_sample(ssig0, rmats)
-    csig1 = StressData.cstress_from_sample(ssig1, rmats)
+    csig0 = StressIncrement.cstress_from_sample(ssig0, rmats)
+    csig1 = StressIncrement.cstress_from_sample(ssig1, rmats)
     dtime = 5.0
-    sdata = StressData(csig0, csig1, dtime)
+    sdata = StressIncrement(csig0, csig1, dtime)
 
     solver = Pointwise(mdata, sdata)
 
@@ -170,16 +170,16 @@ def test_euler_and_block_solvers(fcc_afzb_material):
     numpts = 3
     g0 = 345.63
 
-    rmats = MaterialData.random_orientations(numpts)
-    state = MaterialData.constant_state_af(numpts, g0, matl.num_statevar)
-    mdata = MaterialData(matl, rmats, state)
+    rmats = StateData.random_orientations(numpts)
+    state = StateData.constant_state_af(numpts, g0, matl.num_statevar)
+    mdata = StateData(matl, rmats, state)
 
     ssig0 = np.zeros((3, 3))
     ssig1 = np.diag([300.0, -150.0, -150.0])
 
-    csig0 = StressData.cstress_from_sample(ssig0, rmats)
-    csig1 = StressData.cstress_from_sample(ssig1, rmats)
-    sdata = StressData(csig0, csig1, 2.0)
+    csig0 = StressIncrement.cstress_from_sample(ssig0, rmats)
+    csig1 = StressIncrement.cstress_from_sample(ssig1, rmats)
+    sdata = StressIncrement(csig0, csig1, 2.0)
 
     # Test Euler
     euler_solver = Euler(mdata, sdata)
