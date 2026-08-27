@@ -181,6 +181,9 @@ def argparser(*args):
 
 def cli():
     """Command-line entry point."""
+    # Add working directory to system path so we use local files to load materials.
+    sys.path.append(str(Path.cwd()))
+    print("cwd: ", str(Path.cwd()))
     p = argparser(*sys.argv[1:])
     args = p.parse_args()
     main(args)

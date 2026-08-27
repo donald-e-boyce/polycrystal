@@ -52,6 +52,26 @@ class StressSequence(_StressSequence):
         """
         np.savez(filename, **self._asdict())
 
+    @staticmethod
+    def cstress_from_sample(s_stress, orient):
+        """Rotate a sample-frame stress tensor into each grain's crystal frame.
+
+        Parameters
+        ----------
+        s_stress: array-like (3, 3)
+            Symmetric stress tensor in the sample (lab) frame.
+        orient: array (n, 3, 3)
+            Rotation matrices for each grain (sample -> crystal).
+
+        Returns
+        -------
+        array (n, 3, 3)
+            Per-grain crystal-frame stress tensors.
+        """
+        s = np.array(s_stress).reshape((1, 3, 3))
+        oriT = orient.transpose((0, 2, 1))
+        return orient @ s @ oriT
+
 
 class StateData:
     """Grain ensemble state: crystal orientations, state variables, and
@@ -248,26 +268,6 @@ class StressIncrement:
         filename: str or Path
         """
         np.savez(filename, csig0=self.csig0, csigT=self.csigT, T=self.T)
-
-    @staticmethod
-    def cstress_from_sample(s_stress, orient):
-        """Rotate a sample-frame stress tensor into each grain's crystal frame.
-
-        Parameters
-        ----------
-        s_stress: array-like (3, 3)
-            Symmetric stress tensor in the sample (lab) frame.
-        orient: array (n, 3, 3)
-            Rotation matrices for each grain (sample -> crystal).
-
-        Returns
-        -------
-        array (n, 3, 3)
-            Per-grain crystal-frame stress tensors.
-        """
-        s = np.array(s_stress).reshape((1, 3, 3))
-        oriT = orient.transpose((0, 2, 1))
-        return orient @ s @ oriT
 
     def cstress_t(self, t, ipt=None):
         """Return the linearly interpolated crystal stress at time *t*.

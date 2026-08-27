@@ -78,7 +78,7 @@ def test_statedata_basic(tmp_path):
 
 
 def test_stress_increment_basic(tmp_path):
-    """Test StressIncrement construction, round-trip I/O, interpolation, and frame rotation."""
+    """Test StressIncrement construction, round-trip I/O, and interpolation."""
     csig0 = np.array([[1.0, 0, 0], [0, -1.0, 0], [0, 0, 0]])
     csig1 = np.array([[0.0, 0, 0], [0, 1.0, 0], [0, 0, -1.0]])
     T = 5.2
@@ -96,16 +96,9 @@ def test_stress_increment_basic(tmp_path):
     cmid = 0.5 * (csig0 + csig1)
     assert np.allclose(cmid, sd2.cstress_t(T / 2))
 
-    # 90 degrees about x: [x, y, z] -> [x, z, -y]
-    orient = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]).reshape(1, 3, 3)
-    s_sig = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]]).reshape(1, 3, 3)
-    c_sig = StressIncrement.cstress_from_sample(s_sig, orient)
-    assert s_sig[0, 1, 1] == c_sig[0, 2, 2]
-    assert s_sig[0, 2, 2] == c_sig[0, 1, 1]
-
 
 def test_stress_sequence(tmp_path):
-    """Test StressSequence creation, field access, and round-trip I/O."""
+    """Test StressSequence creation, field access, round-trip I/O, and frame rotation."""
     csig = np.zeros((3, 5, 3, 3))
     csig[1, :, 0, 0] = 100.0
     times = np.array([0.0, 10.0, 20.0])
@@ -121,6 +114,13 @@ def test_stress_sequence(tmp_path):
     assert np.allclose(sseq.csig, sseq2.csig)
     assert np.allclose(sseq.times, sseq2.times)
 
+    # 90 degrees about x: [x, y, z] -> [x, z, -y]
+    orient = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]).reshape(1, 3, 3)
+    s_sig = np.array([[1, 0, 0], [0, 2, 0], [0, 0, 3]]).reshape(1, 3, 3)
+    c_sig = StressSequence.cstress_from_sample(s_sig, orient)
+    assert s_sig[0, 1, 1] == c_sig[0, 2, 2]
+    assert s_sig[0, 2, 2] == c_sig[0, 1, 1]
+
 
 def test_pointwise_solver(fcc_afzb_material):
     """Test Pointwise ODE integration and plastic deformation gradient integration."""
@@ -135,8 +135,8 @@ def test_pointwise_solver(fcc_afzb_material):
     ssig0 = np.zeros((3, 3))
     ssig1 = np.diag([400.0, -200.0, -200.0])
 
-    csig0 = StressIncrement.cstress_from_sample(ssig0, rmats)
-    csig1 = StressIncrement.cstress_from_sample(ssig1, rmats)
+    csig0 = StressSequence.cstress_from_sample(ssig0, rmats)
+    csig1 = StressSequence.cstress_from_sample(ssig1, rmats)
     dtime = 5.0
     sdata = StressIncrement(csig0, csig1, dtime)
 
@@ -177,8 +177,8 @@ def test_euler_and_block_solvers(fcc_afzb_material):
     ssig0 = np.zeros((3, 3))
     ssig1 = np.diag([300.0, -150.0, -150.0])
 
-    csig0 = StressIncrement.cstress_from_sample(ssig0, rmats)
-    csig1 = StressIncrement.cstress_from_sample(ssig1, rmats)
+    csig0 = StressSequence.cstress_from_sample(ssig0, rmats)
+    csig1 = StressSequence.cstress_from_sample(ssig1, rmats)
     sdata = StressIncrement(csig0, csig1, 2.0)
 
     # Test Euler

@@ -3,7 +3,6 @@ from .slipcrystal import SlipCrystal
 from .slipgroup import SlipGroup
 from .solve import (
     StateData,
-    StressIncrement,
     StressSequence,
     Solver,
     Pointwise,
@@ -15,7 +14,6 @@ __all__ = [
     "SlipCrystal",
     "SlipGroup",
     "StateData",
-    "StressIncrement",
     "StressSequence",
     "Solver",
     "Pointwise",
