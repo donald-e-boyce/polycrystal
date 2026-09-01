@@ -1,4 +1,4 @@
-"""Integration tests for run_sequence script and CLI."""
+"""Integration tests for evolve_slip script and CLI."""
 import sys
 from pathlib import Path
 import pytest
@@ -11,8 +11,8 @@ from polycrystal.slip.slip_models import (
     AF_ZeroBackStressParameters,
 )
 from polycrystal.slip.solve import StateData, StressSequence
-from polycrystal.scripts import run_sequence
-from polycrystal.scripts.run_sequence import resolve_material, argparser, main
+from polycrystal.scripts import evolve_slip
+from polycrystal.scripts.evolve_slip import resolve_material, argparser, main
 
 
 @pytest.fixture
@@ -28,8 +28,8 @@ def sample_material():
     return SlipCrystal([get_group("fcc")], AF_ZeroBackStress(params))
 
 
-def test_run_sequence_programmatic(tmp_path, sample_material):
-    """Test run_sequence programmatic execution with saved .npz files."""
+def test_evolve_slip_programmatic(tmp_path, sample_material):
+    """Test evolve_slip programmatic execution with saved .npz files."""
     matl = sample_material
     numpts = 5
     g0 = 345.63
@@ -56,7 +56,7 @@ def test_run_sequence_programmatic(tmp_path, sample_material):
     sseq.save(stress_file)
 
     # Run simulation
-    final_mdata = run_sequence(
+    final_mdata = evolve_slip(
         material=matl,
         material_data=mat_file,
         stress_data=stress_file,
@@ -109,7 +109,7 @@ def test_resolve_material(sample_material, tmp_path, monkeypatch):
         resolve_material("nonexistent_module_xyz:mat")
 
 
-def test_run_sequence_cli(tmp_path, sample_material, monkeypatch):
+def test_evolve_slip_cli(tmp_path, sample_material, monkeypatch):
     """Test CLI argument parsing and main execution."""
     matl = sample_material
     numpts = 3

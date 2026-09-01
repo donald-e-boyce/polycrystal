@@ -2,14 +2,14 @@
 from ..slip.solve import StateData, StressSequence
 
 
-def run_sequence(*args, **kwargs):
+def evolve_slip(*args, **kwargs):
     """Integrate a multi-step stress sequence and save step-NN.npz output files."""
-    from .run_sequence import run_sequence as _run_sequence
-    return _run_sequence(*args, **kwargs)
+    from .evolve_slip import evolve_slip as _evolve_slip
+    return _evolve_slip(*args, **kwargs)
 
 
 __all__ = [
     "StateData",
     "StressSequence",
-    "run_sequence",
+    "evolve_slip",
 ]

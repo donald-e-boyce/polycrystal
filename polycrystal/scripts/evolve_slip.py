@@ -1,4 +1,4 @@
-"""Run a multi-step stress sequence, saving material state after each step.
+"""Evolve plastic slip over a multi-step stress sequence, saving material state after each step.
 
 Loads an initial material state and a :class:`StressSequence` from disk,
 integrates the slip ODEs step-by-step using :class:`~polycrystal.slip.solve.Pointwise`,
@@ -60,7 +60,7 @@ def resolve_material(material):
     return material
 
 
-def run_sequence(material, material_data, stress_data, outdir=None):
+def evolve_slip(material, material_data, stress_data, outdir=None):
     """Integrate a multi-step stress sequence and save step-NN.npz output files.
 
     Parameters
@@ -146,7 +146,7 @@ def main(args):
         f"material data file: {args.material_data}\n"
         f"stress data file: {args.stress_data}"
     )
-    run_sequence(
+    evolve_slip(
         material=args.material,
         material_data=args.material_data,
         stress_data=args.stress_data,
@@ -155,7 +155,7 @@ def main(args):
 
 
 def argparser(*args):
-    """Build and return the argument parser for the run-sequence CLI."""
+    """Build and return the argument parser for the evolve-slip CLI."""
     p = argparse.ArgumentParser(
         description="Evolve plastic slip over a sequence of stress states"
     )

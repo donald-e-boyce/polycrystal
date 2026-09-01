@@ -27,7 +27,7 @@ setup(
     install_requires = install_reqs,
     entry_points = {
         'console_scripts': [
-            'run_sequence = polycrystal.scripts.run_sequence:cli',
+            'evolve_slip = polycrystal.scripts.evolve_slip:cli',
         ],
     },
     )
